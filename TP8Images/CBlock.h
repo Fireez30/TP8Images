@@ -3,7 +3,8 @@
 
 #include "ImageBase.h"
 #include <iostream>
-
+#include <math.h>
+#include <vector>
 
 class CBlock
 {
@@ -13,6 +14,7 @@ class CBlock
         int m_yMin;
         int m_yMax;
         double m_Critere = 0.0 ;
+        ImageBase m_ImageUtile;
 
     public:
         CBlock();
@@ -31,7 +33,9 @@ class CBlock
         void setCritere(double Critere);
 
         void CritereWithMoyenne (ImageBase & Img);
-        void DistanceWithHistogramme (ImageBase & Img);
+        void CritereWithHistogramme (ImageBase & Img);
+
+        void DistanceWithMoyenne (std::vector<ImageBase> & ImgList);
 };
 
 #endif // CBLOCK_H

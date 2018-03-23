@@ -13,14 +13,32 @@ void CBlock::CritereWithMoyenne (ImageBase & Img) {
         for (unsigned j (m_yMin); j < m_yMax; ++j)
             Total += Img[i][j];
 
-    //std::cout << "total : " << Total << std::endl;
     m_Critere = Total / 256.0;
 }
 
-void CBlock::DistanceWithHistogramme (ImageBase & Img) {
+void CBlock::CritereWithHistogramme (ImageBase & Img) {
     //ToDO
 }
 
+void CBlock::DistanceWithMoyenne(std::vector<ImageBase> & ImgList)
+{
+    double ClosestAverage = m_Critere * 1000;
+
+    for (unsigned i (0); i < ImgList.size(); ++i) {
+        double Total = 0.0;
+
+        for (unsigned j (0); j < ImgList[i].getHeight(); ++j)
+            for (unsigned k (0); k < ImgList[i].getWidth(); ++k)
+                Total += ImgList[i][j][k];
+
+        double Average = Total / ImgList[i].getTotalSize();
+
+        if (abs(Average - m_Critere) < abs(ClosestAverage - m_Critere)) {
+            ClosestAverage = Average;
+            m_ImageUtile = ImgList[i];
+        }
+    }
+}
 
 void CBlock::setCritere(double Critere)
 {
