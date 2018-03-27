@@ -40,7 +40,7 @@ void CBlock::DistanceWithMoyenne(std::vector<ImageBase> & ImgList)
     }
 }
 
-void CBlock::DistanceWithMoyenne(std::vector<std::pair<std::string, int> > & ImgList)
+void CBlock::DistanceWithMoyenne(std::vector<std::pair<std::string, int>> & ImgList)
 {
     int ClosestAverage = ImgList[0].second;
     std::string ImgUtile = ImgList[0].first;
