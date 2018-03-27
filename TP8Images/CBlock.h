@@ -15,6 +15,7 @@ class CBlock
         int m_yMax;
         double m_Critere = 0.0 ;
         ImageBase m_ImageUtile;
+        int moyenneImageUtile;
 
     public:
         CBlock();
@@ -25,7 +26,8 @@ class CBlock
         int getyMin() const;
         int getyMax() const;
         double getCritere() const;
-
+        ImageBase getImageUtile() const;
+        
         void setXMin(int xMin);
         void setXMax(int xMax);
         void setYMin(int yMin);

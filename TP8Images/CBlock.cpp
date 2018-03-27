@@ -3,7 +3,7 @@
 CBlock::CBlock() {}
 
 CBlock::CBlock(int xMin, int xMax, int yMin, int yMax)
-    : m_xMin (xMin), m_xMax (xMax), m_yMin (yMin), m_yMax (yMax) {}
+    : m_xMin (xMin), m_xMax (xMax), m_yMin (yMin), m_yMax (yMax) {moyenneImageUtile = 0}
 
 void CBlock::CritereWithMoyenne (ImageBase & Img) {
 
@@ -65,10 +65,16 @@ int CBlock::getyMax() const
     return m_yMax;
 }
 
+ImageBase CBlock::getImageUtile() const
+{
+    return m_ImageUtile;
+}
+
 double CBlock::getCritere() const
 {
     return m_Critere;
 }
+
 
 void CBlock::setXMin(int xMin)
 {
@@ -89,3 +95,4 @@ void CBlock::setYMax(int yMax)
 {
     m_yMax = yMax;
 }
+
