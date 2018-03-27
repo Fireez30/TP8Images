@@ -41,7 +41,7 @@ class CBlock
         void CritereWithHistogramme (ImageBase & Img);
 
         void DistanceWithMoyenne (std::vector<ImageBase> & ImgList);
-        void DistanceWithMoyenne (std::vector<std::pair<std::string, int> > & ImgList);
+        void DistanceWithMoyenne (std::vector<std::pair<std::string, int>> & ImgList);
 };
 
 #endif // CBLOCK_H
