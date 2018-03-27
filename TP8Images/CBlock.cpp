@@ -3,7 +3,7 @@
 CBlock::CBlock() {}
 
 CBlock::CBlock(int xMin, int xMax, int yMin, int yMax)
-    : m_xMin (xMin), m_xMax (xMax), m_yMin (yMin), m_yMax (yMax) {moyenneImageUtile = 0}
+    : m_xMin (xMin), m_xMax (xMax), m_yMin (yMin), m_yMax (yMax) {}
 
 void CBlock::CritereWithMoyenne (ImageBase & Img) {
 
@@ -40,9 +40,23 @@ void CBlock::DistanceWithMoyenne(std::vector<ImageBase> & ImgList)
     }
 }
 
-void CBlock::setCritere(double Critere)
+void CBlock::DistanceWithMoyenne(std::vector<std::pair<std::string, int> > & ImgList)
 {
-    m_Critere = Critere;
+    int ClosestAverage = ImgList[0].second;
+    std::string ImgUtile = ImgList[0].first;
+
+    for (unsigned i (1); i < ImgList.size(); i++)
+        if (abs(ClosestAverage - m_Critere) > abs(ImgList[i].second - m_Critere)) {
+            ClosestAverage = ImgList[i].second;
+            ImgUtile = ImgList[i].first;
+        }
+
+
+    char *cstr = new char[ImgUtile.length()];
+    strcpy(cstr, ImgUtile.c_str());
+
+    m_ImageUtile.load(cstr);
+    m_moyenneImageUtile = ClosestAverage;
 }
 
 int CBlock::getxMin() const
@@ -75,6 +89,11 @@ double CBlock::getCritere() const
     return m_Critere;
 }
 
+int CBlock::getMoyenneImageUtile() const
+{
+    return m_moyenneImageUtile;
+}
+
 
 void CBlock::setXMin(int xMin)
 {
@@ -96,3 +115,12 @@ void CBlock::setYMax(int yMax)
     m_yMax = yMax;
 }
 
+void CBlock::setCritere(double Critere)
+{
+    m_Critere = Critere;
+}
+
+void CBlock::setMoyenneImageUtile(int moyenneImageUtile)
+{
+    m_moyenneImageUtile = moyenneImageUtile;
+}

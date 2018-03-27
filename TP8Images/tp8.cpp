@@ -4,7 +4,6 @@
 #include <fstream>
 #include <vector>
 #include <string.h>
-#include <stdio.h>
 #include "CBlock.h"
 
 using namespace std;
@@ -15,7 +14,7 @@ namespace {
             FileName[i] = to_string(i) + ".pgm";
     }
 
-    vector<CBlock> divisionImage(ImageBase & ImgIn,int pas){
+    vector<CBlock> divisionImage(ImageBase & ImgIn, int pas){
         vector<CBlock> result;
 
         for (unsigned i (0); i < ImgIn.getHeight(); i += pas)
@@ -27,7 +26,7 @@ namespace {
         return result;
     }
 
-    void CreateBlockImage (ImageBase & Img,char* cNomImgEcrite, vector<CBlock> & blocs) {
+    void CreateBlockImage (ImageBase & Img, char* cNomImgEcrite, vector<CBlock> & blocs) {
         ImageBase ImgOut(Img.getWidth(), Img.getHeight(), Img.getColor());
 
         for(int y = 0; y < blocs.size(); y++)
@@ -41,28 +40,28 @@ namespace {
         ImgOut.save(cNomImgEcrite);
     }
 
-    ImageBase resizeImageBy2(ImageBase & in){
-        ImageBase Out (in.getWidth()/2,in.getHeight()/2,in.getColor());
+    ImageBase resizeImageBy2(ImageBase & ImgIn){
+        ImageBase ImgOut (ImgIn.getWidth() / 2, ImgIn.getHeight() / 2, ImgIn.getColor());
 
         int cpti = 0;
         int cptj = 0;
 
-        for (unsigned i (0); i < in.getHeight(); i += 2){
-            for (unsigned j (0); j < in.getWidth() - 1; j += 2){
-                int moyenne = (in[i][j] + in[i][j+1]) / 2;
-                Out[cpti][cptj] = moyenne;
+        for (unsigned i (0); i < ImgIn.getHeight(); i += 2){
+            for (unsigned j (0); j < ImgIn.getWidth() - 1; j += 2){
+                int moyenne = (ImgIn[i][j] + ImgIn[i][j+1]) / 2;
+                ImgOut[cpti][cptj] = moyenne;
                 cptj++;
             }
             cpti++;
         }
 
-        return Out;
+        return ImgOut;
     }
 
-    ImageBase resizeImageToBlockSize(ImageBase in,CBlock b){
-        ImageBase tmp = in;
+    ImageBase resizeImageToBlockSize(ImageBase ImgIn, CBlock Bloc){
+        ImageBase tmp = ImgIn;
         ImageBase result;
-        while (tmp.getWidth() > b.getxMax() - b.getxMin()){
+        while (tmp.getWidth() > Bloc.getxMax() - Bloc.getxMin()){
             result = resizeImageBy2(tmp);
             tmp = result;
         }
@@ -70,27 +69,27 @@ namespace {
         return result;
     }
 
-    void applyBlockToImage(ImageBase & in,CBlock b){
+    void applyBlockToImage(ImageBase & ImgIn, CBlock Bloc){
         ImageBase use;
         ImageBase resized;
 
-        use = b.getImageUtile();
-        resized = resizeImageToBlockSize(use,b);
+        use = Bloc.getImageUtile();
+        resized = resizeImageToBlockSize(use,Bloc);
 
         int cmpimageX = 0;
         int cmpimageY = 0;
 
-        for (int i = b.getxMin(); i < b.getxMax(); i++){
+        for (int i = Bloc.getxMin(); i < Bloc.getxMax(); i++){
             cmpimageX++;
-            for (int j = b.getyMin(); j < b.getyMax(); j++){
-                in[i][j] = resized[cmpimageX][cmpimageY];
+            for (int j = Bloc.getyMin(); j < Bloc.getyMax(); j++){
+                ImgIn[i][j] = resized[cmpimageX][cmpimageY];
                 cmpimageY++;
             }
         }
     }
 
-    void ecritureMoyennesBanque(vector<string> FileName){
-        ofstream File ("moyennes.csv",ios::out | ios::ate);
+    void ecritureMoyennesBanque(const vector<string> & FileName){
+        ofstream File ("moyennes.csv", ios::out | ios::ate);
         if (File){
             cout << "Fichier ouvert ! " << endl;
         }
@@ -110,19 +109,19 @@ namespace {
             double Total = 0.0;
 
             for (unsigned i (0); i < ImgIn.getHeight(); ++i)
-             for (unsigned j (0); j < ImgIn.getWidth(); ++j)
-            Total += ImgIn[i][j];
+                for (unsigned j (0); j < ImgIn.getWidth(); ++j)
+                    Total += ImgIn[i][j];
 
             moyenne = Total / ImgIn.getTotalSize();
 
-            
+
             File << FileName[i] << " " << moyenne << endl;
         }
         File.close();
     }
 
     int getMoyenneWithPicName(string pic){
-        ifstream File("moyennes.csv",ios::in);
+        ifstream File("moyennes.csv", ios::in);
         if (File){
             cout << "Fichier ouvert ! " << endl;
         }
@@ -131,7 +130,7 @@ namespace {
             exit(-1);
         }
 
-        while (!testFichierVide){
+        while (!File.eof()){
             string name;
             int moyenne;
 
@@ -142,6 +141,29 @@ namespace {
 
         cout << "Image non trouvée ! " << endl;
         return -1;
+    }
+
+    vector<pair<string, int> > getAllMoy () {
+        ifstream File("moyennes.csv", ios::in);
+        if (File){
+            cout << "Fichier ouvert ! " << endl;
+        }
+        else {
+            cout << "Erreur lors de l'ouverture" << endl;
+            exit(-1);
+        }
+
+        vector<pair<string, int> > AllMoy;
+
+        while (!File.eof()) {
+            pair<string, int> CurrentPair;
+
+            File >> CurrentPair.first >> CurrentPair.second;
+
+            AllMoy.push_back(CurrentPair);
+        }
+
+        return AllMoy;
     }
 
 }
