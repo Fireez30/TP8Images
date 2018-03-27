@@ -143,7 +143,7 @@ namespace {
         return -1;
     }
 
-    vector<pair<string, int> > getAllMoy () {
+    vector<pair<string, int>> getAllMoy () {
         ifstream File("moyennes.csv", ios::in);
         if (File){
             cout << "Fichier ouvert ! " << endl;
@@ -153,7 +153,7 @@ namespace {
             exit(-1);
         }
 
-        vector<pair<string, int> > AllMoy;
+        vector<pair<string, int>> AllMoy;
 
         while (!File.eof()) {
             pair<string, int> CurrentPair;
