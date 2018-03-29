@@ -15,6 +15,7 @@
 
 #include "ImageBase.h"
 #include "image_ppm.h"
+#include <iostream>
 
 
 
@@ -38,7 +39,8 @@ ImageBase::ImageBase(int imWidth, int imHeight, bool isColor)
 		return;
 	
 	allocation_tableau(data, OCTET, nTaille);
-	dataD = (double*)malloc(sizeof(double) * nTaille);
+    dataD = (double*)malloc(sizeof(double) * nTaille);
+
 	isValid = true;
 }
 
@@ -67,7 +69,7 @@ void ImageBase::reset()
 	if(isValid)
 	{
 		free(data);
-		free(dataD);
+        free(dataD);
 	}
 	isValid = false;
 }

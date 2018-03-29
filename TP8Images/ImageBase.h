@@ -37,7 +37,7 @@ protected:
 
 
 	///////////// Constructeurs/Destructeurs
-protected:
+public:
 	void init();
 	void reset();
 
@@ -47,10 +47,7 @@ public:
 	~ImageBase(void);
 	
 	///////////// Methodes
-protected:
 	void copy(const ImageBase &copy);
-
-public:
 	int getHeight() { return height; };
 	int getWidth() { return width; };
 	int getTotalSize() { return nTaille; };

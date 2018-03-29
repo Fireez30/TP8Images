@@ -88,7 +88,6 @@ namespace {
 
     string resizeImageBy2(ImageBase & ImgIn, string Name){
         ImageBase ImgOut (ImgIn.getWidth() / 2, ImgIn.getHeight() / 2, ImgIn.getColor());
-
         int cpti = 0;
         int cptj = 0;
 
@@ -99,62 +98,61 @@ namespace {
                 ImgOut[cpti][cptj] = moyenne;
                 cptj++;
             }
-            //cout << (int) ImgOut[cpti][cptj] << endl;
             cpti++;
             cptj = 0;
         }
 
-        string FileName = Name.substr(0, Name.size() - 5) + to_string(ImgOut.getHeight()) + ".pgm";
+        string FileName = Name.substr(0, Name.size() - 4) + to_string(ImgOut.getHeight()) + ".pgm";
         char *cstr = new char[FileName.length()];
         strcpy(cstr, FileName.c_str());
         ImgOut.save(cstr);
         return FileName;
     }
 
-    string resizeImageToBlockSize(ImageBase ImgIn, CBlock Bloc){
-        string FileName;
-        while (ImgIn.getWidth() > Bloc.getxMax() - Bloc.getxMin()){
-            FileName = resizeImageBy2(ImgIn, Bloc.getImageUtileName());
-            char *cstr = new char[FileName.length()];
-            strcpy(cstr, FileName.c_str());
-            ImgIn.load(cstr);
+    string resizeImageToBlockSize(string Name, CBlock Bloc){
+        string FileName = "BanqueImage/0.pgm";
+
+        ImageBase Img;
+        char *cstr = new char[Name.length()];
+        strcpy(cstr, Name.c_str());
+        Img.load(cstr);
+
+        while (Img.getWidth() > Bloc.getxMax() - Bloc.getxMin()){
+
+            FileName = resizeImageBy2(Img, Bloc.getImageUtileName());
+
+            Img.reset();
+            char *cstr2 = new char[FileName.length()];
+            strcpy(cstr2, FileName.c_str());
+            Img.load(cstr2);
+
         }
         return FileName;
     }
 
-    void applyBlockToImage(ImageBase ImgIn, CBlock Bloc){
-        ImageBase use;
+    void applyBlockToImage(ImageBase & ImgIn, CBlock Bloc){
         ImageBase resized;
-        ImageBase result (ImgIn.getHeight(),ImgIn.getWidth(),ImgIn.getColor());
+        ImageBase ImgOut;
+        ImgOut.copy(ImgIn);
 
-        string UseName = Bloc.getImageUtileName();
-        char *cstr = new char[UseName.length()];
-        strcpy(cstr, UseName.c_str());
-        use.load(cstr);
-
-
-        string FileName = resizeImageToBlockSize(use, Bloc);
+        string FileName = resizeImageToBlockSize(Bloc.getImageUtileName(), Bloc);
         char *cstr2 = new char[FileName.length()];
         strcpy(cstr2, FileName.c_str());
         resized.load(cstr2);
-
-        for (int i = 0; i < ImgIn.getHeight(); i++)
-            for (int j = 0; j < ImgIn.getWidth(); j++)
-                result[i][j] = ImgIn[i][j];
 
         int cmpimageX = 0;
         int cmpimageY = 0;
 
         for (int i = Bloc.getxMin(); i < Bloc.getxMax(); i++){
             for (int j = Bloc.getyMin(); j < Bloc.getyMax(); j++){
-                result[i][j] = resized[cmpimageX][cmpimageY];
+                ImgOut[i][j] = resized[cmpimageX][cmpimageY];
                 cmpimageY++;
             }
             cmpimageX++;
             cmpimageY=0;
         }
 
-        result.save("result.pgm");
+        ImgOut.save("result1.pgm");
     }
 
     void ecritureMoyennesBanque(const vector<string> & FileName){
@@ -242,13 +240,15 @@ namespace {
 
 int main(int argc, char **argv)
 {
+    char cNomImgLu[250];
     char cNomImgEcrite[250];
-    if (argc != 2)
+    if (argc != 3)
     {
         cout << "Usage: ImageIn.pgm ImageOut.pgm" << endl;
         return -1;
     }
-    sscanf(argv[1],"%s",cNomImgEcrite);
+    sscanf(argv[1],"%s",cNomImgLu);
+    sscanf(argv[2],"%s",cNomImgEcrite);
 
     vector<string> FileName (10001);
     LoadFiles(FileName,10001);
@@ -259,29 +259,23 @@ int main(int argc, char **argv)
 
     if (ts == "oui"){
         ecritureMoyennesBanque(FileName);
-    }
-*/
+    }*/
+
     ImageBase ImgIn;
-    string str = "MHX.pgm";
-    char *cstr = new char[str.length()];
-    strcpy(cstr, str.c_str());
-    ImgIn.load(cstr);
+    ImgIn.load(cNomImgLu);
 
     vector<CBlock> blocs = divisionImage(ImgIn,16);
 
     vector<pair<string,double>> Ms = getAllMoy();
 
-    //Test::TestMalloc(ImgIn);
-
-
+    CreateBlockImage(ImgIn, cNomImgEcrite, blocs);
 
     for (int i = 0; i < blocs.size(); i++){
-        ImgIn.load("result.pgm");
         blocs[i].DistanceWithMoyenne(Ms);
         applyBlockToImage(ImgIn, blocs[i]);
+        ImgIn.save("patate.pgm");
+        ImgIn.load("result1.pgm");
     }
-
-    //ImgIn.save("result.pgm");
 
     return 0;
 

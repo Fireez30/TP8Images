@@ -36,7 +36,7 @@ void CBlock::DistanceWithMoyenne(const std::vector<std::pair<std::__cxx11::strin
     std::string ImgUtile = ImgList[0].first;
 
     for (unsigned i (1); i < ImgList.size(); i++)
-        if (abs(ClosestAverage - m_Critere) < abs(ImgList[i].second - m_Critere)) {
+        if (abs(ClosestAverage - m_Critere) > abs(ImgList[i].second - m_Critere)) {
             ClosestAverage = ImgList[i].second;
             ImgUtile = ImgList[i].first;
         }
