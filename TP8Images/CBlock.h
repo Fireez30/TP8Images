@@ -15,8 +15,8 @@ class CBlock
         int m_yMin;
         int m_yMax;
         double m_Critere = 0.0 ;
-        ImageBase m_ImageUtile;
         int m_moyenneImageUtile = 0;
+        std::string m_ImageUtileName;
 
     public:
         CBlock();
@@ -27,8 +27,8 @@ class CBlock
         int getyMin() const;
         int getyMax() const;
         double getCritere() const;
-        ImageBase getImageUtile() const;
         int getMoyenneImageUtile() const;
+        std::string getImageUtileName() const;
 
         void setXMin(int xMin);
         void setXMax(int xMax);
@@ -36,12 +36,12 @@ class CBlock
         void setYMax(int yMax);
         void setCritere(double Critere);
         void setMoyenneImageUtile(int moyenneImageUtile);
+        void setImageUtileName(const std::string &ImageUtileName);
 
         void CritereWithMoyenne (ImageBase & Img);
         void CritereWithHistogramme (ImageBase & Img);
 
-        void DistanceWithMoyenne (std::vector<ImageBase> & ImgList);
-        void DistanceWithMoyenne (std::vector<std::pair<std::string, int>> & ImgList);
+        void DistanceWithMoyenne (const std::vector<std::pair<std::string, double>> & ImgList);
 };
 
 #endif // CBLOCK_H

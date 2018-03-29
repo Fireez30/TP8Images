@@ -1,5 +1,15 @@
 #include "CBlock.h"
 
+std::string CBlock::getImageUtileName() const
+{
+    return m_ImageUtileName;
+}
+
+void CBlock::setImageUtileName(const std::string &ImageUtileName)
+{
+    m_ImageUtileName = ImageUtileName;
+}
+
 CBlock::CBlock() {}
 
 CBlock::CBlock(int xMin, int xMax, int yMin, int yMax)
@@ -20,42 +30,21 @@ void CBlock::CritereWithHistogramme (ImageBase & Img) {
     //ToDO
 }
 
-void CBlock::DistanceWithMoyenne(std::vector<ImageBase> & ImgList)
+void CBlock::DistanceWithMoyenne(const std::vector<std::pair<std::__cxx11::string, double> > &ImgList)
 {
-    double ClosestAverage = m_Critere * 1000;
-
-    for (unsigned i (0); i < ImgList.size(); ++i) {
-        double Total = 0.0;
-
-        for (unsigned j (0); j < ImgList[i].getHeight(); ++j)
-            for (unsigned k (0); k < ImgList[i].getWidth(); ++k)
-                Total += ImgList[i][j][k];
-
-        double Average = Total / ImgList[i].getTotalSize();
-
-        if (abs(Average - m_Critere) < abs(ClosestAverage - m_Critere)) {
-            ClosestAverage = Average;
-            m_ImageUtile = ImgList[i];
-        }
-    }
-}
-
-void CBlock::DistanceWithMoyenne(std::vector<std::pair<std::string, int>> & ImgList)
-{
-    int ClosestAverage = ImgList[0].second;
+    double ClosestAverage = ImgList[0].second;
     std::string ImgUtile = ImgList[0].first;
 
     for (unsigned i (1); i < ImgList.size(); i++)
-        if (abs(ClosestAverage - m_Critere) > abs(ImgList[i].second - m_Critere)) {
+        if (abs(ClosestAverage - m_Critere) < abs(ImgList[i].second - m_Critere)) {
             ClosestAverage = ImgList[i].second;
             ImgUtile = ImgList[i].first;
         }
 
-
     char *cstr = new char[ImgUtile.length()];
     strcpy(cstr, ImgUtile.c_str());
 
-    m_ImageUtile.load(cstr);
+    m_ImageUtileName = ImgUtile;
     m_moyenneImageUtile = ClosestAverage;
 }
 
@@ -77,11 +66,6 @@ int CBlock::getyMin() const
 int CBlock::getyMax() const
 {
     return m_yMax;
-}
-
-ImageBase CBlock::getImageUtile() const
-{
-    return m_ImageUtile;
 }
 
 double CBlock::getCritere() const
