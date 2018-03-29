@@ -122,9 +122,10 @@ namespace {
         return FileName;
     }
 
-    string applyBlockToImage(ImageBase ImgIn, CBlock Bloc){
+    void applyBlockToImage(ImageBase ImgIn, CBlock Bloc){
         ImageBase use;
         ImageBase resized;
+        ImageBase result (ImgIn.getHeight(),ImgIn.getWidth(),ImgIn.getColor());
 
         string UseName = Bloc.getImageUtileName();
         char *cstr = new char[UseName.length()];
@@ -137,20 +138,23 @@ namespace {
         strcpy(cstr2, FileName.c_str());
         resized.load(cstr2);
 
+        for (int i = 0; i < ImgIn.getHeight(); i++)
+            for (int j = 0; j < ImgIn.getWidth(); j++)
+                result[i][j] = ImgIn[i][j];
 
         int cmpimageX = 0;
         int cmpimageY = 0;
 
         for (int i = Bloc.getxMin(); i < Bloc.getxMax(); i++){
             for (int j = Bloc.getyMin(); j < Bloc.getyMax(); j++){
-                ImgIn[i][j] = resized[cmpimageX][cmpimageY];
+                result[i][j] = resized[cmpimageX][cmpimageY];
                 cmpimageY++;
             }
             cmpimageX++;
             cmpimageY=0;
         }
 
-        ImgIn.save("result.pgm");
+        result.save("result.pgm");
     }
 
     void ecritureMoyennesBanque(const vector<string> & FileName){
@@ -272,6 +276,7 @@ int main(int argc, char **argv)
 
 
     for (int i = 0; i < blocs.size(); i++){
+        ImgIn.load("result.pgm");
         blocs[i].DistanceWithMoyenne(Ms);
         applyBlockToImage(ImgIn, blocs[i]);
     }
