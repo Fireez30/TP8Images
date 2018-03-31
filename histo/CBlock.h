@@ -15,7 +15,9 @@ class CBlock
         int m_yMin;
         int m_yMax;
         double m_Critere = 0.0 ;
+        std::vector<unsigned> histo;
         int m_moyenneImageUtile = 0;
+        int m_distanceImageUtile = 1000000000;
         std::string m_ImageUtileName;
 
     public:
@@ -42,6 +44,7 @@ class CBlock
         void CritereWithHistogramme (ImageBase & Img);
 
         void DistanceWithMoyenne (const std::vector<std::pair<std::string, double>> & ImgList);
+        void DistanceWithHistogramme(const std::vector<std::pair<std::string, double>> & ImgList);
 };
 
 #endif // CBLOCK_H

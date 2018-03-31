@@ -94,6 +94,53 @@ void HistogrammeBanque (string FileName) {
         }
     }
 
+    unsigned ChiSquared(vector<unsigned> histoImage,vector<unsigned> histoBDD){
+        unsigned dist = 0;
+
+        for (int i = 0; i < histoImage.size(); i++){
+            dist += pow(histoImage[i] - histoBDD[i],2) / (histoImage[i] + histoBDD[i]);
+        }
+
+        return dist;
+    }
+
+    void WriteDistances(vector<unsigned> histoImage,vector<string> FileNames){
+        ofstream File ("distances.csv", ios::out);
+        if (File){
+            cout << "Fichier ouvert ! " << endl;
+        }
+        else {
+            cout << "Erreur lors de l'ouverture" << endl;
+            exit(-1);
+        }
+        for (int i = 0; i < FileNames.size(); i++){
+            if (i == 500)
+                break;
+            ifstream Data(FileNames[i].substr(0, FileNames[i].size() - 4)+".dat", ios::in);
+            if (Data){
+                cout << "Fichier ouvert ! " << endl;
+            }
+            else {
+                cout << "Erreur lors de l'ouverture" << endl;
+                exit(-1);
+            }
+
+            vector<unsigned> histoBDD (256);
+            for (int j = 0; j < histoBDD.size(); j++){
+                Data >> histoBDD[j];
+            }
+            Data.close();
+
+            unsigned dist = ChiSquared(histoImage,histoBDD);
+            cout << dist << endl;
+            File << FileNames[i] << " " << dist << endl;
+
+            histoBDD.clear();
+        }
+
+        File.close();
+    }
+
     void LoadFiles(vector<string> & FileName, int number){
         cout << "Ecriture des fichiers dans le vector de noms " << endl;
         for (unsigned i (0); i < number; i++)
@@ -277,6 +324,30 @@ void HistogrammeBanque (string FileName) {
         return AllMoy;
     }
 
+        vector<pair<string, double>> getAllDist () {
+        cout << "Recuperation des distances " << endl;
+        ifstream File("distances.csv", ios::in);
+        if (File){
+            cout << "Fichier ouvert ! " << endl;
+        }
+        else {
+            cout << "Erreur lors de l'ouverture" << endl;
+            exit(-1);
+        }
+
+        vector<pair<string, double>> AllDist;
+        pair<string, double> CurrentPair;
+
+        while (!File.eof()) {
+
+            File >> CurrentPair.first >> CurrentPair.second;
+
+            AllDist.push_back(CurrentPair);
+        }
+        cout << "Fin recuperation des moyennes " << endl;
+        return AllDist;
+    }
+
 }
 
 int main(int argc, char **argv)
@@ -304,8 +375,30 @@ int main(int argc, char **argv)
 
     ImageBase ImgIn;
     ImgIn.load(cNomImgLu);
+    vector<unsigned> histoImgIn;
+    
+    string stt;
+    cout << "L'image a mosaique est elle différente du dernier appel ? " << endl;
+    cin >> stt;
 
-    vector<CBlock> blocs = divisionImage(ImgIn,16);
+    if (stt == "oui"){
+        int somme = 0;
+        histoImgIn = HistogrammeBase(ImgIn);
+        for (int i = 0; i < histoImgIn.size(); i++){
+            cout << i << " : " << histoImgIn[i] << endl;
+            somme += histoImgIn[i];}
+        cout << "somme :  " << somme << endl;
+
+        WriteDistances(histoImgIn,FileName);
+    }
+
+    vector<pair<string, double>> AllDist = getAllDist();
+    for (int i = 0; i < AllDist.size(); i++){
+        cout << "Fic : " << AllDist[i].first << " Distance : " << AllDist[i].second << endl;
+    } 
+
+   
+    /*vector<CBlock> blocs = divisionImage(ImgIn,16);
 
     vector<pair<string,double>> Ms = getAllMoy();
 
@@ -318,7 +411,7 @@ int main(int argc, char **argv)
         ImgIn.load("result1.pgm");
     }
 
-   
+   */
     return 0;
 
 }
