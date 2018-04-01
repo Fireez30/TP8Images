@@ -90,6 +90,7 @@ void HistogrammeBanque (string FileName) {
 
     void WriteHistos(vector<string> FileName){
         for (int i = 0; i < FileName.size(); i++){
+            cout << "Write histos boucle : " << i << endl;
             HistogrammeBanque(FileName[i]);
         }
     }
@@ -114,8 +115,7 @@ void HistogrammeBanque (string FileName) {
             exit(-1);
         }
         for (int i = 0; i < FileNames.size(); i++){
-            if (i == 500)
-                break;
+            cout << "Write distances boucle : " << i << endl;
             ifstream Data(FileNames[i].substr(0, FileNames[i].size() - 4)+".dat", ios::in);
             if (Data){
                 cout << "Fichier ouvert ! " << endl;
@@ -377,41 +377,38 @@ int main(int argc, char **argv)
     ImgIn.load(cNomImgLu);
     vector<unsigned> histoImgIn;
     
-    string stt;
-    cout << "L'image a mosaique est elle différente du dernier appel ? " << endl;
-    cin >> stt;
+    //string stt;
+    //cout << "L'image a mosaique est elle différente du dernier appel ? " << endl;
+    //cin >> stt;
 
-    if (stt == "oui"){
-        int somme = 0;
-        histoImgIn = HistogrammeBase(ImgIn);
-        for (int i = 0; i < histoImgIn.size(); i++){
-            cout << i << " : " << histoImgIn[i] << endl;
-            somme += histoImgIn[i];}
-        cout << "somme :  " << somme << endl;
+    //if (stt == "oui"){
+    //    int somme = 0;
+    //    histoImgIn = HistogrammeBase(ImgIn);
+    //    for (int i = 0; i < histoImgIn.size(); i++){
+    //        cout << i << " : " << histoImgIn[i] << endl;
+    //        somme += histoImgIn[i];}
+    //    cout << "somme :  " << somme << endl;
 
-        WriteDistances(histoImgIn,FileName);
-    }
+    //    WriteDistances(histoImgIn,FileName);
+    //}
 
-    vector<pair<string, double>> AllDist = getAllDist();
-    for (int i = 0; i < AllDist.size(); i++){
-        cout << "Fic : " << AllDist[i].first << " Distance : " << AllDist[i].second << endl;
-    } 
-
-   
-    /*vector<CBlock> blocs = divisionImage(ImgIn,16);
-
-    vector<pair<string,double>> Ms = getAllMoy();
-
-    CreateBlockImage(ImgIn, cNomImgEcrite, blocs);
+   cout << "Division de l'image en blocs ! " << endl;
+    vector<CBlock> blocs = divisionImage(ImgIn,16);
 
     for (int i = 0; i < blocs.size(); i++){
-        blocs[i].DistanceWithMoyenne(Ms);
+        cout << "Ecriture de l'histogramme du bloc : " << i << endl;
+        blocs[i].CritereWithHistogramme(ImgIn);
+        cout << "Calcul de la distance min du bloc : " << i << endl;
+        blocs[i].DistanceWithHistogramme(FileName);
+    }
+
+    for (int i = 0; i < blocs.size(); i++){
+        cout << "Applique le bloc : " << i << " a l'image ! " << endl;
         applyBlockToImage(ImgIn, blocs[i]);
         ImgIn.save("patate.pgm");
         ImgIn.load("result1.pgm");
     }
 
-   */
     return 0;
 
 }

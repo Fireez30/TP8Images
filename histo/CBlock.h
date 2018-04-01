@@ -31,7 +31,7 @@ class CBlock
         double getCritere() const;
         int getMoyenneImageUtile() const;
         std::string getImageUtileName() const;
-
+        unsigned ChiSquared(const std::vector<unsigned> histoBDD);
         void setXMin(int xMin);
         void setXMax(int xMax);
         void setYMin(int yMin);
@@ -42,9 +42,9 @@ class CBlock
 
         void CritereWithMoyenne (ImageBase & Img);
         void CritereWithHistogramme (ImageBase & Img);
-
+        std::vector<unsigned> HistogrammeFromImage(ImageBase Img);
         void DistanceWithMoyenne (const std::vector<std::pair<std::string, double>> & ImgList);
-        void DistanceWithHistogramme(const std::vector<std::pair<std::string, double>> & ImgList);
+        void DistanceWithHistogramme(const std::vector<std::string> FileNames);
 };
 
 #endif // CBLOCK_H

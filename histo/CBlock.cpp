@@ -54,22 +54,41 @@ void CBlock::DistanceWithMoyenne(const std::vector<std::pair<std::__cxx11::strin
     m_moyenneImageUtile = ClosestAverage;
 }
 
-void CBlock::DistanceWithHistogramme(const std::vector<std::pair<std::__cxx11::string, double> > &ImgList)
+std::vector<unsigned> CBlock::HistogrammeFromImage(ImageBase Img){
+    std::cout << "Histogramme from image ! " << std::endl;
+    std::vector <unsigned> Histotmp (256);
+
+    for (unsigned i (0); i < Img.getHeight(); i++)
+        for (unsigned j (0); j < Img.getWidth(); j++)
+            for (unsigned k (0); k < 256; ++k) {
+                if (Img[i][j] == k) {Histotmp[k]++;
+                    break;}
+            }
+           std::cout << " fin Histogramme from image ! " << std::endl;  
+    return Histotmp;
+}
+
+void CBlock::DistanceWithHistogramme(const std::vector<std::string> FileNames)
 {
-    double ClosestAverage = ImgList[0].second;
-    std::string ImgUtile = ImgList[0].first;
-    m_critere = ClosestAverage;
-    for (unsigned i (1); i < ImgList.size(); i++)
-        if (abs(ClosestAverage - m_Critere) > abs(ImgList[i].second - m_Critere)) {
-            ClosestAverage = ImgList[i].second;
-            ImgUtile = ImgList[i].first;
+    for (int i = 0; i < FileNames.size(); i++){
+        std::cout << "DistanceWithHistogramme avec image bdd numero : " << i << std::endl;
+        ImageBase ImgTmp;
+
+        char *cstr = new char[FileNames[i].length()];
+        strcpy(cstr, FileNames[i].c_str());
+        ImgTmp.load(cstr);
+
+        
+    std::vector<unsigned> histoActuel = HistogrammeFromImage(ImgTmp);
+        std::cout << "Avant ChiSquared ! " << std::endl;
+        int dist = ChiSquared(histoActuel);
+std::cout << "Apres ChiSquared ! " << std::endl;
+        if (m_distanceImageUtile > dist){
+            m_distanceImageUtile = dist;
+            m_ImageUtileName = FileNames[i];
         }
-
-    char *cstr = new char[ImgUtile.length()];
-    strcpy(cstr, ImgUtile.c_str());
-
-    m_ImageUtileName = ImgUtile;
-    m_moyenneImageUtile = ClosestAverage;
+        std::cout << "Apres test changement " << std::endl;
+    }
 }
 
 int CBlock::getxMin() const
@@ -121,6 +140,16 @@ void CBlock::setYMin(int yMin)
 void CBlock::setYMax(int yMax)
 {
     m_yMax = yMax;
+}
+
+unsigned CBlock::ChiSquared(const std::vector<unsigned> histoBDD){
+    unsigned dist = 0;
+
+    for (int i = 0; i < histoBDD.size(); i++){
+         dist += pow(histo[i] - histoBDD[i],2) / (histo[i] + histoBDD[i]);
+    }
+
+    return dist;
 }
 
 void CBlock::setCritere(double Critere)
