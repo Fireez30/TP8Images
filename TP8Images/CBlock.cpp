@@ -1,5 +1,6 @@
 #include "CBlock.h"
 
+
 std::string CBlock::getImageUtileName() const
 {
     return m_ImageUtileName;
@@ -13,7 +14,10 @@ void CBlock::setImageUtileName(const std::string &ImageUtileName)
 CBlock::CBlock() {}
 
 CBlock::CBlock(int xMin, int xMax, int yMin, int yMax)
-    : m_xMin (xMin), m_xMax (xMax), m_yMin (yMin), m_yMax (yMax) {}
+    : m_xMin (xMin), m_xMax (xMax), m_yMin (yMin), m_yMax (yMax) {
+    std::vector <unsigned> Histo (256);
+    m_Histogramme = Histo;
+}
 
 void CBlock::CritereWithMoyenne (ImageBase & Img) {
 
@@ -23,12 +27,9 @@ void CBlock::CritereWithMoyenne (ImageBase & Img) {
         for (unsigned j (m_yMin); j < m_yMax; ++j)
             Total += Img[i][j];
 
-    m_Critere = Total / 256.0;
+    m_Critere = Total / (double) ((m_xMax - m_xMin) * (m_yMax - m_yMin));
 }
 
-void CBlock::CritereWithHistogramme (ImageBase & Img) {
-    //ToDO
-}
 
 void CBlock::DistanceWithMoyenne(const std::vector<std::pair<std::__cxx11::string, double> > &ImgList)
 {
@@ -46,6 +47,84 @@ void CBlock::DistanceWithMoyenne(const std::vector<std::pair<std::__cxx11::strin
 
     m_ImageUtileName = ImgUtile;
     m_moyenneImageUtile = ClosestAverage;
+}
+
+std::vector<unsigned> CBlock::getHistogramme() const
+{
+    return m_Histogramme;
+}
+
+void CBlock::setHistogramme(const std::vector<unsigned> &Histogramme)
+{
+    m_Histogramme = Histogramme;
+}
+
+std::vector<unsigned> CBlock::HistogrammeFromImage(std::string & FileName){
+    /*ImageBase Img;
+    char *cstr = new char[FileName.length()];
+    strcpy(cstr, FileName.c_str());
+    Img.load(cstr);
+
+
+    std::vector <unsigned> Histotmp (256);
+
+    for (unsigned i (0); i < Img.getHeight(); i++)
+        for (unsigned j (0); j < Img.getWidth(); j++)
+            for (unsigned k (0); k < 256; ++k)
+                if (Img[i][j] == k) {
+                    Histotmp[k]++;
+                    break;
+                }*/
+
+    std::string tmp = FileName.substr(0, FileName.size() - 4);
+    std::ifstream File (tmp + ".dat");
+    std::vector <unsigned> Histotmp (256);
+
+    for (unsigned k (0); k < 256; ++k)
+        File >> Histotmp[k];
+
+    //std::cout << Histotmp[0] << std::endl;
+
+    return Histotmp;
+}
+
+void CBlock::CritereWithHistogramme (ImageBase & Img) {
+    for (unsigned i (m_xMin); i < m_xMax; i++)
+        for (unsigned j (m_yMin); j < m_yMax; j++)
+            for (unsigned k (0); k < 256; ++k)
+                if (Img[i][j] == k) {
+                    m_Histogramme[k]++;
+                    break;
+                }
+}
+
+double CBlock::ChiSquared(const std::vector<unsigned> histoBDD){
+    double dist = 0.0;
+
+    for (int i = 0; i < histoBDD.size(); i++){
+        if (m_Histogramme[i] + histoBDD[i] == 0)
+            dist += (double) pow(histoBDD[i] - m_Histogramme[i], 2);
+        else
+            dist += (double) pow(histoBDD[i] - m_Histogramme[i], 2) / (double) (m_Histogramme[i] + histoBDD[i]);
+    }
+
+    return dist;
+}
+
+void CBlock::DistanceWithHistogramme(std::vector<std::string> & FileNames)
+{
+    for (int i = 0; i < FileNames.size(); i++){
+        //std::cout << "DistanceWithHistogramme avec image bdd numero : " << i << std::endl;
+
+
+        std::vector<unsigned> histoActuel = HistogrammeFromImage(FileNames[i]);
+        double dist = ChiSquared(histoActuel);
+        if (m_distanceImageUtile > dist) {
+            m_distanceImageUtile = dist;
+            m_ImageUtileName = FileNames[i];
+            if (dist == 0.0) break;
+        }
+    }
 }
 
 int CBlock::getxMin() const

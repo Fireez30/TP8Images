@@ -50,9 +50,105 @@ namespace Test {
     void NewResize (ImageBase & ImgIn) {
 
     }
+
+    void TestFile () {
+        ofstream f ("test.txt");
+
+        f << "c" << endl;
+
+    }
 }
 
 namespace {
+    vector <unsigned> HistogrammeBase (ImageBase Img) {
+
+        vector <unsigned> Histo (256);
+
+        for (unsigned i (0); i < Img.getHeight(); i++)
+            for (unsigned j (0); j < Img.getWidth(); j++)
+                for (unsigned k (0); k < 256; ++k) {
+                    if (Img[i][j] == k) {Histo[k]++;
+                        break;}
+                }
+
+        return Histo;
+    }
+
+    void HistogrammeBanque (string FileName) {
+        ImageBase Img;
+        char *cstr = new char[FileName.length()];
+        strcpy(cstr, FileName.c_str());
+        Img.load(cstr);
+
+        vector <unsigned> Histo (256);
+        string tmp = FileName.substr(0, FileName.size() - 4);
+        ofstream Dat (tmp + ".dat");
+
+        for (unsigned i (0); i < Img.getHeight(); i++)
+            for (unsigned j (0); j < Img.getWidth(); j++)
+                for (unsigned k (0); k < 256; ++k) {
+                    if (Img[i][j] == k) {Histo[k]++;
+                        break;}
+                }
+        for (unsigned i (0); i < Histo.size(); ++i)
+            Dat << Histo[i] << endl;
+    }
+
+    void WriteHistos(vector<string> FileName){
+        for (int i = 0; i < FileName.size(); i++){
+            cout << FileName[i] << endl;
+            HistogrammeBanque(FileName[i]);
+        }
+    }
+
+    double ChiSquared(vector<unsigned> histoImage, vector<unsigned> histoBDD){
+        double dist = 0;
+
+        for (int i = 0; i < histoImage.size(); i++){
+            if (histoImage[i] + histoBDD[i] == 0)
+                dist += pow(histoBDD[i] - histoImage[i], 2);
+            else
+                dist += pow(histoBDD[i] - histoImage[i], 2) / (double) (histoImage[i] + histoBDD[i]);
+        }
+
+        return dist;
+    }
+
+    void WriteDistances(vector<unsigned> histoImage, vector<string> FileNames){
+        ofstream File ("distances.csv", ios::out);
+        if (File){
+            cout << "Fichier ouvert ! " << endl;
+        }
+        else {
+            cout << "Erreur lors de l'ouverture" << endl;
+            exit(-1);
+        }
+        for (int i = 0; i < FileNames.size(); i++){
+            ifstream Data(FileNames[i].substr(0, FileNames[i].size() - 4)+".dat", ios::in);
+            if (Data){
+                cout << "Fichier ouvert ! " << endl;
+            }
+            else {
+                cout << "Erreur lors de l'ouverture" << endl;
+                exit(-1);
+            }
+
+            vector<unsigned> histoBDD (256);
+            for (int j = 0; j < histoBDD.size(); j++){
+                Data >> histoBDD[j];
+            }
+            Data.close();
+
+            double dist = ChiSquared(histoImage,histoBDD);
+            cout << dist << endl;
+            File << FileNames[i] << " " << dist << endl;
+
+            histoBDD.clear();
+        }
+
+        File.close();
+    }
+
     void LoadFiles(vector<string> & FileName, int number){
         cout << "Ecriture des fichiers dans le vector de noms " << endl;
         for (unsigned i (0); i < number; i++)
@@ -102,10 +198,12 @@ namespace {
             cptj = 0;
         }
 
-        string FileName = Name.substr(0, Name.size() - 4) + to_string(ImgOut.getHeight()) + ".pgm";
+        string FileName = Name.substr(0, Name.size() - 4) + "RESIZED" + to_string(ImgOut.getHeight()) + ".pgm";
+
         char *cstr = new char[FileName.length()];
         strcpy(cstr, FileName.c_str());
         ImgOut.save(cstr);
+
         return FileName;
     }
 
@@ -125,8 +223,8 @@ namespace {
             char *cstr2 = new char[FileName.length()];
             strcpy(cstr2, FileName.c_str());
             Img.load(cstr2);
-
         }
+
         return FileName;
     }
 
@@ -167,6 +265,7 @@ namespace {
         }
 
         for (int i = 0; i < FileName.size(); i++){
+            cout << FileName[i] << endl;
             ImageBase ImgIn;
             double moyenne = 0;
 
@@ -238,8 +337,8 @@ namespace {
 
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
+
     char cNomImgLu[250];
     char cNomImgEcrite[250];
     if (argc != 3)
@@ -254,29 +353,75 @@ int main(int argc, char **argv)
     LoadFiles(FileName,10001);
 
     /*string ts;
-    cout << "Mise a jour des moyennes necessaire ? oui ou non" << endl;
-    cin >> ts;
+        cout << "Mise a jour des moyennes necessaire ? oui ou non" << endl;
+        cin >> ts;
 
-    if (ts == "oui"){
-        ecritureMoyennesBanque(FileName);
-    }*/
+        if (ts == "oui"){
+            ecritureMoyennesBanque(FileName);
+        }//*/
 
     ImageBase ImgIn;
     ImgIn.load(cNomImgLu);
 
-    vector<CBlock> blocs = divisionImage(ImgIn,16);
+
+
+    vector<CBlock> blocs = divisionImage(ImgIn, 8);
 
     vector<pair<string,double>> Ms = getAllMoy();
 
     CreateBlockImage(ImgIn, cNomImgEcrite, blocs);
 
     for (int i = 0; i < blocs.size(); i++){
+        cout << "bloc " << i << endl;
         blocs[i].DistanceWithMoyenne(Ms);
         applyBlockToImage(ImgIn, blocs[i]);
         ImgIn.save("patate.pgm");
         ImgIn.load("result1.pgm");
     }
 
-    return 0;
+    return 0;//*/
+
+    /*char cNomImgLu[250];
+    char cNomImgEcrite[250];
+    if (argc != 3)
+    {
+        cout << "Usage: ImageIn.pgm ImageOut.pgm" << endl;
+        return -1;
+    }
+    sscanf(argv[1],"%s",cNomImgLu);
+    sscanf(argv[2],"%s",cNomImgEcrite);
+
+    vector<string> FileName (10001);
+    LoadFiles(FileName,10001);
+
+/*    string ts;
+    cout << "Mise a jour des histogrammes necessaire ? oui ou non" << endl;
+    cin >> ts;
+
+    if (ts == "oui"){
+        WriteHistos(FileName);
+    }//*/
+
+    /*ImageBase ImgIn;
+    ImgIn.load(cNomImgLu);
+    //vector<unsigned> histoImgIn;
+
+    vector<CBlock> blocs = divisionImage(ImgIn, 16);
+
+    for (int i = 0; i < blocs.size(); i++){
+        cout << "bloc " << i << endl;
+        blocs[i].CritereWithHistogramme(ImgIn);
+        blocs[i].DistanceWithHistogramme(FileName);
+    }
+
+    for (int i = 0; i < blocs.size(); i++){
+        cout << "Applique le bloc : " << i << " a l'image ! " << endl;
+        applyBlockToImage(ImgIn, blocs[i]);
+        ImgIn.save("patate.pgm");
+        ImgIn.load("result1.pgm");
+    }
+
+    return 0;//*/
 
 }
+

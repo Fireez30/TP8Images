@@ -68,7 +68,7 @@ void ImageBase::reset()
 {
 	if(isValid)
 	{
-		free(data);
+        free(data);
         free(dataD);
 	}
 	isValid = false;
