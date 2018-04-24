@@ -8,57 +8,6 @@
 
 using namespace std;
 
-namespace Test {
-    void TestMalloc (ImageBase & ImgIn) {
-        ImageBase ImgOut (ImgIn.getWidth() / 2, ImgIn.getHeight() / 2, ImgIn.getColor());
-        ImageBase ImgOut2 (ImgIn.getWidth() / 4, ImgIn.getHeight() / 4, ImgIn.getColor());
-        ImgOut2.~ImageBase();
-        ImageBase ImgOut3 (ImgIn.getWidth() / 6, ImgIn.getHeight() / 6, ImgIn.getColor());
-        ImageBase ImgOut4 (ImgIn.getWidth() / 8, ImgIn.getHeight() / 8, ImgIn.getColor());
-        ImageBase ImgOut5 (ImgIn.getWidth() / 9, ImgIn.getHeight() / 9, ImgIn.getColor());
-
-        cout << "patate" << endl;
-    }
-
-    void TestImgIn (ImageBase & ImgIn) {
-        ImgIn.save("TestingImgIn.pgm");
-        exit(-2);
-    }
-
-    void NewApplyBloc (ImageBase & ImgIn, vector<CBlock> & blocs) {
-        unsigned NumBloc = 0;
-        unsigned NbBlocLine = 0;
-        unsigned Modulo = blocs[0].getxMax() - blocs[0].getxMin();
-        for (unsigned i (0); i < ImgIn.getHeight(); i++) {
-            for (unsigned j (0); j < ImgIn.getWidth(); j++) {
-                if (j > 0 && j % Modulo == 0) NumBloc++;
-
-                string ImgName = blocs[NumBloc + NbBlocLine].getImageUtileName();
-                ImageBase Bloc;
-
-                char *cstr = new char[ImgName.length()];
-                strcpy(cstr, ImgName.c_str());
-                Bloc.load(cstr);
-
-                ImgIn[i][j] = Bloc[i % Modulo][j % Modulo];
-            }
-            NumBloc = 0;
-            if (i > 0 && i % Modulo == 0) NbBlocLine = NbBlocLine + (ImgIn.getHeight() / Modulo);
-        }
-    }
-
-    void NewResize (ImageBase & ImgIn) {
-
-    }
-
-    void TestFile () {
-        ofstream f ("test.txt");
-
-        f << "c" << endl;
-
-    }
-}
-
 namespace {
     vector <unsigned> HistogrammeBase (ImageBase Img) {
 
@@ -350,24 +299,14 @@ int main(int argc, char **argv) {
     sscanf(argv[2],"%s",cNomImgEcrite);
 
     vector<string> FileName (10001);
-    LoadFiles(FileName,10001);
-
-    /*string ts;
-        cout << "Mise a jour des moyennes necessaire ? oui ou non" << endl;
-        cin >> ts;
-
-        if (ts == "oui"){
-            ecritureMoyennesBanque(FileName);
-        }//*/
+    LoadFiles(FileName, 10001);
 
     ImageBase ImgIn;
     ImgIn.load(cNomImgLu);
 
+    vector<CBlock> blocs = divisionImage(ImgIn, 16);
 
-
-    vector<CBlock> blocs = divisionImage(ImgIn, 8);
-
-    vector<pair<string,double>> Ms = getAllMoy();
+    vector<pair<string, double>> Ms = getAllMoy();
 
     CreateBlockImage(ImgIn, cNomImgEcrite, blocs);
 
@@ -379,34 +318,10 @@ int main(int argc, char **argv) {
         ImgIn.load("result1.pgm");
     }
 
-    return 0;//*/
+    ImgIn.save("Result Moyenne 16x16.pgm");
 
-    /*char cNomImgLu[250];
-    char cNomImgEcrite[250];
-    if (argc != 3)
-    {
-        cout << "Usage: ImageIn.pgm ImageOut.pgm" << endl;
-        return -1;
-    }
-    sscanf(argv[1],"%s",cNomImgLu);
-    sscanf(argv[2],"%s",cNomImgEcrite);
-
-    vector<string> FileName (10001);
-    LoadFiles(FileName,10001);
-
-/*    string ts;
-    cout << "Mise a jour des histogrammes necessaire ? oui ou non" << endl;
-    cin >> ts;
-
-    if (ts == "oui"){
-        WriteHistos(FileName);
-    }//*/
-
-    /*ImageBase ImgIn;
     ImgIn.load(cNomImgLu);
-    //vector<unsigned> histoImgIn;
 
-    vector<CBlock> blocs = divisionImage(ImgIn, 16);
 
     for (int i = 0; i < blocs.size(); i++){
         cout << "bloc " << i << endl;
@@ -421,7 +336,79 @@ int main(int argc, char **argv) {
         ImgIn.load("result1.pgm");
     }
 
-    return 0;//*/
+    ImgIn.save("Result Histogramme 16x16.pgm");
+
+    ImgIn.load(cNomImgLu);
+
+    if (ImgIn.getHeight() % 32 == 0 && ImgIn.getWidth() % 32 == 0) {
+
+        blocs = divisionImage(ImgIn, 32);
+
+        CreateBlockImage(ImgIn, cNomImgEcrite, blocs);
+
+        for (int i = 0; i < blocs.size(); i++){
+            cout << "bloc " << i << endl;
+            blocs[i].DistanceWithMoyenne(Ms);
+            applyBlockToImage(ImgIn, blocs[i]);
+            ImgIn.save("patate.pgm");
+            ImgIn.load("result1.pgm");
+        }
+
+        ImgIn.save("Result Moyenne 32x32.pgm");
+
+        ImgIn.load(cNomImgLu);
+
+
+        for (int i = 0; i < blocs.size(); i++){
+            cout << "bloc " << i << endl;
+            blocs[i].CritereWithHistogramme(ImgIn);
+            blocs[i].DistanceWithHistogramme(FileName);
+        }
+
+        for (int i = 0; i < blocs.size(); i++){
+            cout << "Applique le bloc : " << i << " a l'image ! " << endl;
+            applyBlockToImage(ImgIn, blocs[i]);
+            ImgIn.save("patate.pgm");
+            ImgIn.load("result1.pgm");
+        }
+
+        ImgIn.save("Result Histogramme 32x32.pgm");
+
+        ImgIn.load(cNomImgLu);
+    }
+
+    blocs = divisionImage(ImgIn, 8);
+
+    CreateBlockImage(ImgIn, cNomImgEcrite, blocs);
+
+    for (int i = 0; i < blocs.size(); i++){
+        cout << "bloc " << i << endl;
+        blocs[i].DistanceWithMoyenne(Ms);
+        applyBlockToImage(ImgIn, blocs[i]);
+        ImgIn.save("patate.pgm");
+        ImgIn.load("result1.pgm");
+    }
+
+    ImgIn.save("Result Moyenne 8x8.pgm");
+
+    ImgIn.load(cNomImgLu);
+
+    for (int i = 0; i < blocs.size(); i++){
+        cout << "bloc " << i << endl;
+        blocs[i].CritereWithHistogramme(ImgIn);
+        blocs[i].DistanceWithHistogramme(FileName);
+    }
+
+    for (int i = 0; i < blocs.size(); i++){
+        cout << "Applique le bloc : " << i << " a l'image ! " << endl;
+        applyBlockToImage(ImgIn, blocs[i]);
+        ImgIn.save("patate.pgm");
+        ImgIn.load("result1.pgm");
+    }
+
+    ImgIn.save("Result Histogramme 8x8.pgm");
+
+    return 0;
 
 }
 

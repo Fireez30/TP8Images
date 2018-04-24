@@ -59,22 +59,17 @@ void CBlock::setHistogramme(const std::vector<unsigned> &Histogramme)
     m_Histogramme = Histogramme;
 }
 
+std::vector<double> CBlock::getCritereCouleur() const
+{
+    return m_CritereCouleur;
+}
+
+void CBlock::setCritereCouleur(const std::vector<double> &CritereCouleur)
+{
+    m_CritereCouleur = CritereCouleur;
+}
+
 std::vector<unsigned> CBlock::HistogrammeFromImage(std::string & FileName){
-    /*ImageBase Img;
-    char *cstr = new char[FileName.length()];
-    strcpy(cstr, FileName.c_str());
-    Img.load(cstr);
-
-
-    std::vector <unsigned> Histotmp (256);
-
-    for (unsigned i (0); i < Img.getHeight(); i++)
-        for (unsigned j (0); j < Img.getWidth(); j++)
-            for (unsigned k (0); k < 256; ++k)
-                if (Img[i][j] == k) {
-                    Histotmp[k]++;
-                    break;
-                }*/
 
     std::string tmp = FileName.substr(0, FileName.size() - 4);
     std::ifstream File (tmp + ".dat");
@@ -96,6 +91,30 @@ void CBlock::CritereWithHistogramme (ImageBase & Img) {
                     m_Histogramme[k]++;
                     break;
                 }
+}
+
+void CBlock::CritereWithMoyenneCouleur(ImageBase &Img)
+{
+    double TotalR = 0.0;
+    double TotalG = 0.0;
+    double TotalB = 0.0;
+
+    /*imC[y*3][x*3+0] = 200; // R
+            imC[y*3][x*3+1] = 0; // G
+            imC[y*3][x*3+2] = 0; // B*/
+
+    for (unsigned i (m_xMin); i < m_xMax; ++i)
+        for (unsigned j (m_yMin); j < m_yMax; ++j) {
+            TotalR += Img[i*3][j*3];
+            TotalG += Img[i*3][j*3+1];
+            TotalB += Img[i*3][j*3+2];
+        }
+
+    m_CritereCouleur.push_back(TotalR / (double) (((m_xMax - m_xMin) * (m_yMax - m_yMin)) / 3));
+    m_CritereCouleur.push_back(TotalG / (double) (((m_xMax - m_xMin) * (m_yMax - m_yMin)) / 3));
+    m_CritereCouleur.push_back(TotalB / (double) (((m_xMax - m_xMin) * (m_yMax - m_yMin)) / 3));
+
+    m_Critere = 0.299 * m_CritereCouleur[0] + 0.587 * m_CritereCouleur[1] + 0.114 * m_CritereCouleur[2];
 }
 
 double CBlock::ChiSquared(const std::vector<unsigned> histoBDD){
@@ -125,6 +144,29 @@ void CBlock::DistanceWithHistogramme(std::vector<std::string> & FileNames)
             if (dist == 0.0) break;
         }
     }
+}
+
+void CBlock::DistanceWithMoyenneCouleur(const std::vector<std::pair<std::__cxx11::string, std::vector <double>>> &ImgList)
+{
+    //Y = 0.299 R + 0.587 G + 0.114 B
+
+    double ClosestAverage = 0.299 * ImgList[0].second[0] + 0.587 * ImgList[0].second[1] + 0.114 * ImgList[0].second[2];
+    std::string ImgUtile = ImgList[0].first;
+
+    for (unsigned i (1); i < ImgList.size(); i++){
+        double CurrentAverage = 0.299 * ImgList[0].second[0] + 0.587 * ImgList[0].second[1] + 0.114 * ImgList[0].second[2];
+        if (abs(ClosestAverage - m_Critere) > abs(CurrentAverage - m_Critere)) {
+            ClosestAverage = CurrentAverage;
+            ImgUtile = ImgList[i].first;
+        }
+    }
+
+    char *cstr = new char[ImgUtile.length()];
+    strcpy(cstr, ImgUtile.c_str());
+
+    m_ImageUtileName = ImgUtile;
+    m_moyenneImageUtile = ClosestAverage;
+
 }
 
 int CBlock::getxMin() const

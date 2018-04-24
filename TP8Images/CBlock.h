@@ -16,6 +16,7 @@ class CBlock
         int m_yMin;
         int m_yMax;
         double m_Critere = 0.0;
+        std::vector <double> m_CritereCouleur;
         std::vector <unsigned> m_Histogramme;
         double m_distanceImageUtile = 10000000000000000000000000000000000000000000000000.0;
         int m_moyenneImageUtile = 0;
@@ -38,6 +39,7 @@ class CBlock
         int getMoyenneImageUtile() const;
         std::string getImageUtileName() const;
         std::vector<unsigned> getHistogramme() const;
+        std::vector<double> getCritereCouleur() const;
 
         void setXMin(int xMin);
         void setXMax(int xMax);
@@ -47,12 +49,17 @@ class CBlock
         void setMoyenneImageUtile(int moyenneImageUtile);
         void setImageUtileName(const std::string &ImageUtileName);
         void setHistogramme(const std::vector<unsigned> &Histogramme);
+        void setCritereCouleur(const std::vector<double> &CritereCouleur);
 
         void CritereWithMoyenne (ImageBase & Img);
         void CritereWithHistogramme (ImageBase & Img);
+        void CritereWithMoyenneCouleur (ImageBase & Img);
+        void CritereWithHistogrammeCouleur (ImageBase & Img);
 
         void DistanceWithMoyenne (const std::vector<std::pair<std::string, double>> & ImgList);
         void DistanceWithHistogramme(std::vector<std::__cxx11::string> &FileNames);
+        void DistanceWithMoyenneCouleur (const std::vector<std::pair<std::string, std::vector <double>>> & ImgList);
+        void DistanceWithHistogrammeCouleur(std::vector<std::__cxx11::string> &FileNames);
 };
 
 #endif // CBLOCK_H
